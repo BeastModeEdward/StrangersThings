@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Route, Link, useHistory } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
 import { Posts, AccountForm } from './components';
-import AddNewPost from './components/addNewPost';
+import AddNewPost from './components/AddNewPost';
 import Profile from './components/Profile';
 
 const App = () => {

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
-import { fetchFromApi } from '../../api';
-import './addNewPost.css';
+import { fetchFromApi } from '../api';
 
 const AddNewPost = () => {
   const { _id } = useParams();
