@@ -1,55 +1,50 @@
-import React, { useState } from "react";
-import { Link,useParams } from "react-router-dom";
-import { fetchFromApi } from "../api";
+import React, { useState } from 'react';
+import { Link, useHistory, useParams } from 'react-router-dom';
+import { fetchFromApi } from '../api';
 
-
-
-const AccountForm = ({setToken, setUser }) => {
-  const {actionType} = useParams()
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+const AccountForm = ({ setToken, setUser }) => {
+  const history = useHistory();
+  const { actionType } = useParams();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
-
     const requestBody = {
-        user: {
-            username,
-            password
-          }
-    }
-
- 
-
+      user: {
+        username,
+        password,
+      },
+    };
     const data = await fetchFromApi({
       endPoint: actionType,
       method: 'post',
-      body: requestBody
-    })
-    console.log(data);
-    
-    const {token} = data
-    if (token){
+      body: requestBody,
+    });
+    console.log('data', data);
+
+    const { token } = data.data;
+    localStorage.setItem('token', token);
+    if (token) {
       const data = await fetchFromApi({
         endPoint: 'user',
         token,
-      })
-      const user = data.user;
-      if (user){
-        setUsername("")
-        setPassword("")
-        setToken(token)
-        setUser(user)
+      });
+      console.log('kh data', data.data);
+      localStorage.setItem('username', data.data.username);
+      if (data.data) {
+        setUsername('');
+        setPassword('');
+        setToken(token);
+        setUser(data.data);
+        history.push(`/profile`);
       }
-      console.log(user)
     }
-
   };
 
   return (
     <>
-      <h1>{actionType==="register"? "Sign Up": "Log In"}</h1>
+      <h1>{actionType === 'register' ? 'Sign Up' : 'Log In'}</h1>
       <form onSubmit={handleSubmit}>
         <div>
           <label htmlFor="UserName">Username</label>
@@ -71,11 +66,15 @@ const AccountForm = ({setToken, setUser }) => {
           />
         </div>
 
-        <button type="submit">{actionType==='register'?'Register':'Login'}</button>
-        {actionType==='register'
-        ?<Link to="/profile/login">Have an Account? Sign In</Link>
-        :<Link to="/profile/register">Need an Account? Register Here!</Link>}
-        </form>
+        <button type="submit">
+          {actionType === 'register' ? 'Register' : 'Login'}
+        </button>
+        {actionType === 'register' ? (
+          <Link to="/profile/login">Have an Account? Sign In</Link>
+        ) : (
+          <Link to="/profile/register">Need an Account? Register Here!</Link>
+        )}
+      </form>
     </>
   );
 };

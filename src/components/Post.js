@@ -1,46 +1,102 @@
-import React, { useEffect, useState } from "react";
-import { fetchFromApi } from "../api";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
-
-
-const Posts = () => {
-  const [posts, setPosts] = useState([]);
-
-  const fetchPosts = async () => {
-    const data = await fetchFromApi({
-      endPoint: "posts"
-    })
-
-    if(data?.posts){
-      setPosts(result.data.posts);
-    };
-    
+const Post = ({ post, idx, posts, setPosts }) => {
+  const [sendMessage, setSendMessage] = useState(false);
+  const [content, setContent] = useState('');
+  const postMessage = async () => {
+    const API_URL =
+      'https://strangers-things.herokuapp.com/api/2301-FTB-PT-WEB-PT';
+    try {
+      const response = await fetch(`${API_URL}/posts/${post._id}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          message: {
+            content: content,
+          },
+        }),
+      });
+      const result = await response.json();
+      console.log(result);
+      setSendMessage(false);
+      setContent('');
+      return result;
+    } catch (err) {
+      console.error(err);
+    }
   };
-  useEffect(() => {
-    fetchPosts();
-  }, []);
+
+  const deletePost = async (id) => {
+    const API_URL =
+      'https://strangers-things.herokuapp.com/api/2301-FTB-PT-WEB-PT';
+    try {
+      const response = await fetch(`${API_URL}/posts/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      const result = await response.json();
+      console.log(result);
+      setPosts(posts.filter((obj) => obj._id !== id));
+      alert('Post is Deleted');
+      return result;
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
-    <>
-      <h1>Posts</h1>
-
-      <div>
-        {posts ? (
-          posts.map((posts, idx) => (
-            <div key={posts.id ?? idx}>
-              <h5>Item: {posts.title}</h5>
-              <p>{posts.description}</p>
-              <small>Price: {posts.price}</small>
-              <br />
-              <hr />
-            </div>
-          ))
-        ) : (
-          <div>No Post</div>
-        )}
-      </div>
-    </>
+    <div key={post.id ?? idx}>
+      <h5>Item: {post.title}</h5>
+      <p>{post.description}</p>
+      <small>Price: {post.price}</small>
+      <br />
+      {post.author.username === localStorage.getItem('username') ? (
+        <>
+          {localStorage.getItem('token') && (
+            <>
+              <Link to={`/posts/edit/${post._id}`}>
+                <button
+                  onClick={() => {
+                    localStorage.setItem('editPost', JSON.stringify(post));
+                  }}
+                >
+                  Edit
+                </button>
+              </Link>
+              <button onClick={() => deletePost(post._id)}>Delete</button>
+            </>
+          )}
+        </>
+      ) : (
+        <>
+          {sendMessage ? (
+            <>
+              <h1>Message:</h1>
+              <input
+                type="text"
+                placeholder="Title"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+              />
+              <button onClick={() => postMessage()}>Send Message</button>
+            </>
+          ) : (
+            localStorage.getItem('token') && (
+              <button onClick={() => setSendMessage(true)}>Send Message</button>
+            )
+          )}
+        </>
+      )}
+      <hr />
+    </div>
   );
 };
 
-export default Posts;
+export default Post;

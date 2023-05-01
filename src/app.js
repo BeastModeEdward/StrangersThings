@@ -1,40 +1,66 @@
-import React, {useState, useEffect} from "react";
-import { Route, Link } from "react-router-dom";
-import {
-    Posts,
-    AccountForm
-} from './components';
-
-
+import React, { useState, useEffect } from 'react';
+import { Route, Link, useHistory } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import { Posts, AccountForm } from './components';
+import AddNewPost from './components/addNewPost';
+import Profile from './components/Profile';
 
 const App = () => {
-  const[token,setToken] = useState(null);
-  const[user, setUser] = useState(null);
+  const history = useHistory();
+  const [token, setToken] = useState(null);
+  const [user, setUser] = useState(null);
 
-  useEffect(()=>{
-    console.log('token: '+ token)
-    console.log('user: '+ user) 
-  },[token,user])
-
+  useEffect(() => {
+    console.log('token: ' + token);
+    console.log('user: ' + user);
+  }, [token, user]);
 
   return (
-    <><nav>
-      <Link to="/">Home</Link>|
-      <Link to="/profile/login">Log In</Link>|
-      <Link to="/posts">Posts</Link>
-
+    <>
+      <nav>
+        <Link to="/">Home</Link>
+        {localStorage.getItem('token') && (
+          <>
+            |<Link to="/profile">Profile</Link>
+          </>
+        )}
+        |
+        {localStorage.getItem('token') ? (
+          <span
+            style={{ cursor: 'pointer' }}
+            onClick={() => {
+              localStorage.removeItem('token');
+              localStorage.removeItem('username');
+              history.push(`/profile/login`);
+              window.location.reload(false);
+            }}
+          >
+            Logout
+          </span>
+        ) : (
+          <Link exact to="/profile/login">
+            Log In
+          </Link>
+        )}
+        |<Link to="/posts">Posts</Link>
       </nav>
       <Route exact path="/">
         <h1>Welcome</h1>
       </Route>
-      <Route path="/posts">
+      <Route exact path="/posts">
         <Posts />
       </Route>
       <Route exact path="/profile">
-        <h1>My Profile</h1>
+        <Profile />
+      </Route>
+      <Route exact path="/posts/add">
+        <AddNewPost />
+      </Route>
+      <Route exact path="/posts/edit/:_id">
+        <AddNewPost />
       </Route>
       <Route path="/profile/:actionType">
-        <AccountForm setToken={setToken} setUser={setUser}/>
+        <AccountForm setToken={setToken} setUser={setUser} />
       </Route>
     </>
   );
